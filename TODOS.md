@@ -21,12 +21,24 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done · ⛔ blocked
 - ⬜ `.gitignore` — standard Go + binary name
 - ⬜ `git init`, first commit
 
-## Day 2 — Linux lister (development platform)
+## Day 2 — macOS lister (user's actual hardware) ✅
+
+- ✅ Add `golang.org/x/sys` dependency
+- ✅ `cmd/scan/scan.go` — platform-agnostic two-phase scan pipeline
+- ✅ `internal/proc/fake.go` — FakeLister for pipeline unit tests
+- ✅ `internal/proc/proc_darwin.go` — `ps -axww` enumeration + `ps eww` env fetch
+- ✅ `internal/proc/parse_ps.go` — platform-neutral ps eww line parser
+- ✅ `internal/proc/parse_ps_test.go` — parser tests run on every platform
+- ✅ `internal/proc/proc_other.go` — loud unsupported stub for non-darwin
+- ✅ `cmd/scan/scan_test.go` — 3 end-to-end pipeline tests via FakeLister
+- ✅ `main.go` — wire runScan + `encoding/json` indented stdout
+- ✅ Cross-compile darwin/arm64 and darwin/amd64 from Windows host
+- ⬜ End-to-end `botmurmur scan` run on user's Mac hardware (user will test later)
+
+## Day 3 — Linux lister
 
 - ⬜ `internal/proc/proc_linux.go` — `/proc` enumeration, cmdline read, start_time from stat field 22
-- ⬜ `internal/proc/proc_linux_test.go` — spawn subprocess with known env, assert detection
-- ⬜ `cmd/scan.go` — wire `Lister` → `detect` → `json.Encode(os.Stdout)`
-- ⬜ End-to-end `botmurmur scan` runs on Linux and finds at least 3 agent types
+- ⬜ Integration test on Linux runner (GitHub Actions)
 
 ## Day 3 — MCP parsing + watch
 

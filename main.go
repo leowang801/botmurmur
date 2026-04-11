@@ -9,8 +9,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+
+	"github.com/leowang801/botmurmur/cmd/scan"
+	"github.com/leowang801/botmurmur/internal/proc"
 )
 
 const version = "0.0.1-dev"
@@ -22,8 +26,10 @@ func main() {
 	}
 	switch os.Args[1] {
 	case "scan":
-		fmt.Fprintln(os.Stderr, "botmurmur scan: not yet implemented (Day 2 lands the Linux lister)")
-		os.Exit(1)
+		if err := runScan(); err != nil {
+			fmt.Fprintln(os.Stderr, "botmurmur scan:", err)
+			os.Exit(1)
+		}
 	case "watch":
 		fmt.Fprintln(os.Stderr, "botmurmur watch: not yet implemented (Day 3)")
 		os.Exit(1)
@@ -36,6 +42,20 @@ func main() {
 		usage()
 		os.Exit(2)
 	}
+}
+
+// runScan executes the two-phase scan pipeline and JSON-encodes the result
+// to stdout. Partial failures are already captured as inline warnings in the
+// Scan struct, so this function returns non-nil only on fatal errors.
+func runScan() error {
+	lister := proc.NewLister()
+	result, err := scan.Run(lister)
+	if err != nil {
+		return err
+	}
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	return enc.Encode(result)
 }
 
 func usage() {
