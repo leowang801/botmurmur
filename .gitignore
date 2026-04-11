@@ -1,0 +1,19 @@
+# Binaries
+botmurmur
+botmurmur.exe
+*.exe
+*.test
+*.out
+
+# Build artifacts
+/dist/
+/bin/
+
+# IDE / agent state
+.vscode/
+.idea/
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
