@@ -65,11 +65,14 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done · ⛔ blocked
 - ⬜ Integration test on real macOS runner (GitHub Actions)
 - ⬜ `env_truncated` warning emission test
 
-## Day 5 — Windows lister (hardest, do last)
+## Day 5 — Windows lister ✅ (pulled forward from end-of-plan)
 
-- ⬜ `internal/proc/proc_windows.go` — Toolhelp32 snapshot + PEB read via `ReadProcessMemory`
-- ⬜ `IsWow64Process` branching for 32/64-bit bitness
-- ⬜ Integration test on windows-latest runner
+- ✅ `internal/proc/proc_windows.go` — Toolhelp32 snapshot + PEB read via `ReadProcessMemory`
+- ✅ 64-bit scanner → 64-bit target: full support (start time, user, cmdline, env)
+- ✅ `IsWow64Process` detection → `wow64_unsupported` warning for 32-bit targets (full WOW64 support deferred)
+- ✅ Protected process → `permission_denied` warning, scan continues
+- ✅ `internal/proc/proc_windows_test.go` — integration tests via self-pid (List finds self, FetchEnv reads own env, env block parser, permission_denied path)
+- ✅ Manual smoke: spawned python.exe with langchain cmdline + ANTHROPIC_API_KEY → correctly detected end-to-end
 
 ## Distribution
 

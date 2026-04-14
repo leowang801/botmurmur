@@ -9,7 +9,7 @@ Agent-semantic process scanner. Given a running process, `botmurmur` answers:
 
 Output is stable JSON, designed for security teams who want to inventory AI activity across a fleet.
 
-Status: **pre-alpha.** macOS lister works. Linux and Windows listers land in follow-up commits.
+Status: **pre-alpha.** macOS and Windows listers work. Linux lister lands in a follow-up commit.
 
 ## Commands
 
@@ -76,32 +76,27 @@ Watching in a terminal:
 
 ## Running on Windows
 
-The Windows lister is not yet implemented — it lands after the Linux lister. If you run `botmurmur scan` on Windows today, you get a loud error rather than a silent zero-agent report:
-
-```
-botmurmur scan: this platform is not yet supported — macOS is the first target.
-Linux and Windows land in follow-up commits.
-```
-
-In the meantime, if you're on Windows and want to develop or run tests, every platform-neutral package (scan pipeline, watch diff, credential detection, agent detection, ps parser) builds and tests cleanly:
+The Windows lister uses `CreateToolhelp32Snapshot` for enumeration and PEB reads via `ReadProcessMemory` for command lines and environment variables. Pure Go, no CGO, no external tools, statically linked.
 
 ```bash
-git clone https://github.com/leowang801/botmurmur.git
-cd botmurmur
-go vet ./...
-go build ./...
-go test ./... -count=1
+go build -o botmurmur.exe .
+./botmurmur.exe scan
+./botmurmur.exe watch
 ```
 
-You can also cross-compile a macOS binary from Windows and copy it to a Mac:
+Run as a normal user to see processes you own. To inspect processes owned by other users (SYSTEM services, other logons), launch an **elevated** terminal (Run as Administrator) and run from there.
 
-```bash
-set GOOS=darwin
-set GOARCH=arm64
-go build -o botmurmur-darwin-arm64 .
+Known limits on Windows v1:
+
+- **32-bit target processes on a 64-bit host (WOW64):** env read is skipped and a `wow64_unsupported` warning is emitted. The 32-bit PEB lives at a different virtual address with different struct offsets. Full WOW64 support lands in a follow-up commit.
+- **Protected processes** (antivirus, DRM, lsass, csrss): `OpenProcess` is refused by the kernel regardless of elevation. `permission_denied` warning is emitted and the scan continues. This is working as intended — a userspace tool cannot read the env of a PP/PPL process.
+- **Command-line reading** requires `PROCESS_VM_READ`. Without it, the `cmd` field falls back to the executable basename, which means script-language agents (Python + LangChain, Node + ai-sdk) won't match their framework unless the scanner is elevated.
+
+PowerShell equivalents for env vars in cross-compile commands:
+
+```powershell
+$env:GOOS="darwin"; $env:GOARCH="arm64"; go build -o botmurmur-darwin-arm64.exe .
 ```
-
-(PowerShell uses `$env:GOOS="darwin"` instead of `set GOOS=darwin`.)
 
 ## JSON output schema
 
