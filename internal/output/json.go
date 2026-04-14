@@ -16,12 +16,17 @@ type Scan struct {
 // Frameworks is always an array, even when only one framework matched. This
 // schema choice is intentional — a process can match multiple frameworks
 // simultaneously (e.g. Claude Code invoking a LangChain subprocess tool).
+//
+// StartTime is RFC3339-encoded process start time. It is part of the process
+// identity used by `botmurmur watch` to diff snapshots: (PID, StartTime) is
+// stable even across PID reuse.
 type Agent struct {
 	PID         int          `json:"pid"`
 	Name        string       `json:"name"`
 	Frameworks  []string     `json:"frameworks"`
 	Cmd         string       `json:"cmd"`
 	User        string       `json:"user"`
+	StartTime   string       `json:"start_time"`
 	Credentials []Credential `json:"credentials"`
 	MCPServers  []MCPServer  `json:"mcp_servers"`
 	ToolAccess  []string     `json:"tool_access"`

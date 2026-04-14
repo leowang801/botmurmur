@@ -14,6 +14,7 @@ import (
 	"os"
 
 	"github.com/leowang801/botmurmur/cmd/scan"
+	"github.com/leowang801/botmurmur/cmd/watch"
 	"github.com/leowang801/botmurmur/internal/proc"
 )
 
@@ -31,8 +32,10 @@ func main() {
 			os.Exit(1)
 		}
 	case "watch":
-		fmt.Fprintln(os.Stderr, "botmurmur watch: not yet implemented (Day 3)")
-		os.Exit(1)
+		if err := runWatch(); err != nil {
+			fmt.Fprintln(os.Stderr, "botmurmur watch:", err)
+			os.Exit(1)
+		}
 	case "version", "--version", "-v":
 		fmt.Println("botmurmur", version)
 	case "help", "--help", "-h":
@@ -56,6 +59,13 @@ func runScan() error {
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
 	return enc.Encode(result)
+}
+
+// runWatch starts the long-running poll loop. Events stream to stdout one per
+// line, in a grep-friendly format. Exits cleanly on SIGINT/SIGTERM.
+func runWatch() error {
+	lister := proc.NewLister()
+	return watch.Run(lister, watch.DefaultInterval, os.Stdout)
 }
 
 func usage() {

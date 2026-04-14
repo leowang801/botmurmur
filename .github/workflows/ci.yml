@@ -1,0 +1,80 @@
+name: CI
+
+# Cross-platform test matrix. The macOS lister currently lives behind a
+# darwin build tag and the Linux/Windows listers will follow — but the
+# platform-neutral pieces (parser, agent detection, scan pipeline, watch
+# diff) compile and run everywhere on day one. Running tests on all three
+# OSes from day one means we catch portability bugs the moment they land,
+# instead of finding them when we finally try to ship a Linux binary.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.2'
+          check-latest: true
+
+      - name: Print Go env
+        run: go version
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: go build
+        run: go build ./...
+
+      - name: go test
+        run: go test ./... -count=1
+
+  cross-compile:
+    # Sanity check: every release target must build cleanly from a single
+    # host. Run on linux because cross-compiling to darwin/windows from
+    # linux is the cheapest of the three combinations.
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.2'
+          check-latest: true
+
+      - name: Build darwin/arm64
+        env:
+          GOOS: darwin
+          GOARCH: arm64
+        run: go build -o /tmp/botmurmur-darwin-arm64 .
+
+      - name: Build darwin/amd64
+        env:
+          GOOS: darwin
+          GOARCH: amd64
+        run: go build -o /tmp/botmurmur-darwin-amd64 .
+
+      - name: Build linux/amd64
+        env:
+          GOOS: linux
+          GOARCH: amd64
+        run: go build -o /tmp/botmurmur-linux-amd64 .
+
+      - name: Build windows/amd64
+        env:
+          GOOS: windows
+          GOARCH: amd64
+        run: go build -o /tmp/botmurmur-windows-amd64.exe .

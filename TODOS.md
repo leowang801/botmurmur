@@ -35,19 +35,28 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done · ⛔ blocked
 - ✅ Cross-compile darwin/arm64 and darwin/amd64 from Windows host
 - ⬜ End-to-end `botmurmur scan` run on user's Mac hardware (user will test later)
 
-## Day 3 — Linux lister
+## Day 3 — Watch + cross-platform CI ✅
+
+- ✅ `internal/output/json.go` — add `StartTime` to `Agent` (RFC3339, watch diff key)
+- ✅ `cmd/scan/scan.go` — wire `StartTime` through pipeline
+- ✅ `cmd/watch/diff.go` — `(PID, start_time)` snapshot diff with stable event order
+- ✅ `cmd/watch/diff_test.go` — empty / all-added / all-stopped / no-change / **PID reuse** / mixed churn
+- ✅ `cmd/watch/watch.go` — `RunContext` ticker loop + SIGINT/SIGTERM via `signal.NotifyContext`
+- ✅ `cmd/watch/watch_test.go` — initial-scan-emits-ADDED via FakeLister + writeEvent format lock
+- ✅ `main.go` — wire `runWatch`
+- ✅ `.github/workflows/ci.yml` — ubuntu/macos/windows test matrix + cross-compile job
+- ⬜ End-to-end watch run on real Mac hardware (user will test later)
+
+## Day 4 — Linux lister
 
 - ⬜ `internal/proc/proc_linux.go` — `/proc` enumeration, cmdline read, start_time from stat field 22
-- ⬜ Integration test on Linux runner (GitHub Actions)
+- ⬜ Integration test on Linux runner via existing CI matrix
 
-## Day 3 — MCP parsing + watch
+## Day 4 — MCP parsing
 
 - ⬜ `internal/mcp/paths.go` — platform-aware path expansion
 - ⬜ `internal/mcp/parse.go` — parse `mcpServers` field from JSON
 - ⬜ `internal/mcp/parse_test.go` — golden files from real Cursor and Claude Desktop configs (redacted)
-- ⬜ `internal/output/diff.go` — `(PID, start_time)` snapshot diff
-- ⬜ `cmd/watch.go` — poll loop + diff + SIGINT handling
-- ⬜ T4 (watch diff PID reuse test)
 - ⬜ T6 (partial failure handling test with mock lister)
 
 ## Day 4 — macOS lister

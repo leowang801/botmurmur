@@ -108,6 +108,7 @@ func Run(lister proc.Lister) (output.Scan, error) {
 			Frameworks:  frameworks,
 			Cmd:         p.Cmd,
 			User:        p.User,
+			StartTime:   p.StartTime.UTC().Format(time.RFC3339),
 			Credentials: credList,
 			MCPServers:  []output.MCPServer{},
 			ToolAccess:  []string{},
